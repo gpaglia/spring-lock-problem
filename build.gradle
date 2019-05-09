@@ -1,0 +1,103 @@
+
+plugins {
+	id 'java-library'
+	id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+    id 'org.springframework.boot' version '2.1.3.RELEASE' apply false
+}
+
+group = 'com.gpaglia.springlock'
+version='0.0.1'
+description = 'Spring lock problem - test cases'
+
+repositories {       
+    mavenLocal()    // maven local        
+    mavenCentral()  // maven central
+    jcenter()		// jcenter
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+        // '-proc:none', 
+        '-AfullyAnnotationConfigured=true',
+        '-Xlint:deprecation'
+    ]
+}
+   
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'source'
+    group = 'build'
+    description = 'Generate sources jar'
+    from sourceSets.main.allJava
+}
+
+ext.springBootVersion = '2.1.3.RELEASE'		// only for BOM import
+
+// javax annotations api
+ext.javaxAnnotationApiVersion = '1.3.2'
+
+// jaxb api
+ext.jaxbApiVersion = '2.4.0-b180830.0359'
+
+// h2 more recent than spring boot
+ext.h2Version = '1.4.199'
+
+// junit 5
+ext['junit-jupiter.version'] = '5.4.1'
+ext.hamcrestVersion = '2.1'
+
+dependencyManagement {
+    imports {
+        // maven bom for spring boot's curated dependencies
+        mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    }
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+	
+	// The production code uses the SLF4J logging API at compile time
+	// compile 'org.slf4j:slf4j-api:1.7.24'
+	implementation 'org.slf4j:slf4j-api'
+	
+	// spring boot
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		
+	// apache dbcp2 
+	implementation 'org.apache.commons:commons-dbcp2'
+			
+	// h2database
+	implementation group: 'com.h2database', name: 'h2', version: "${h2Version}"				
+	// implementation 'com.gpaglia:h2-custom-dialect'
+
+	// hibernate
+	// https://mvnrepository.com/artifact/org.hibernate/hibernate-java8 merged into core as of hibernate 5.2
+	implementation group: 'org.hibernate', name: 'hibernate-core'
+	
+	// https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator
+	implementation group: 'org.hibernate.validator', name: 'hibernate-validator'
+	
+	// https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api
+	implementation group: 'javax.annotation', name: 'javax.annotation-api'
+
+	// jaxb api
+	implementation group: 'javax.xml.bind', name: 'jaxb-api'
+		
+	// logback classic and core
+	runtimeOnly "ch.qos.logback:logback-classic"
+	
+	// spring boot starter test [exclude junit 4 to have junit5 support]
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		// exclude junit 4
+		exclude group: 'junit', module: 'junit'
+	}	
+
+	// add junit5
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
+
+}
+
