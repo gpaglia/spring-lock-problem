@@ -82,7 +82,7 @@ public class SpringLockTest {
 
   @Test
   @Transactional
-  public void forceIncrementWithRepoQueryTest() {
+  public void forceIncrementWithRepoQueryOptimisticTest() {
 
     // set the id
     Long id = 275L;
@@ -106,7 +106,7 @@ public class SpringLockTest {
     // this time using the repository with the @Lock annotation
     // and a custom query
 
-    Optional<Parent> popt = parentRepo.customFindById(id);
+    Optional<Parent> popt = parentRepo.optimisticFindById(id);
     assertThat(popt.isPresent(), is(true));
     Parent p1 = popt.get();
 
@@ -119,6 +119,49 @@ public class SpringLockTest {
     // also the saved entity still has version not incremented
     // as if the @Lock annotation was not considered.
     assertThat(p2.getVersion(), is(0L));
+
+    
+  }
+
+  @Test
+  @Transactional
+  public void forceIncrementWithRepoQueryPessimisticTest() {
+
+    // set the id
+    Long id = 275L;
+    
+    // build the entity
+    Parent p0 = new Parent(id, "Hello world.");
+
+    assertThat(p0.getVersion(), is(nullValue()));
+
+    // persist it 
+    em.persist(p0);
+    em.flush();
+
+    // Version is 0 as expected
+    assertThat(p0.getVersion(), is(0L));
+
+    // clear the persistence context
+    em.clear();
+
+    // get the object again from DB, requiring the lock
+    // this time using the repository with the @Lock annotation
+    // and a custom query
+
+    Optional<Parent> popt = parentRepo.pessimisticFindById(id);
+    assertThat(popt.isPresent(), is(true));
+    Parent p1 = popt.get();
+
+    // The version ahs been indeed incremented, so he PESSIMISTIC_FORCE_INCREMENT
+    // works as expected.
+    assertThat(p1.getVersion(), is(1L));
+
+    Parent p2 = parentRepo.saveAndFlush(p1);
+
+    // also the saved entity  has version  incremented
+    // and  @Lock annotation was correctly considered..
+    assertThat(p2.getVersion(), is(1L));
 
     
   }

@@ -20,6 +20,10 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
 
   @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
   @Query("select p from Parent p where p.id = ?1")
-  Optional<Parent> customFindById(Long id);
+  Optional<Parent> optimisticFindById(Long id);
+
+  @Lock(LockModeType.PESSIMISTIC_FORCE_INCREMENT)
+  @Query("select p from Parent p where p.id = ?1")
+  Optional<Parent> pessimisticFindById(Long id);
   
 }
