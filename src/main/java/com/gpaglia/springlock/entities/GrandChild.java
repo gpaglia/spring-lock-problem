@@ -1,16 +1,12 @@
 package com.gpaglia.springlock.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Access;
 import javax.persistence.AccessType;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -19,9 +15,9 @@ import javax.persistence.Version;
  */
 
 @Entity
-@Table(name = "PARENTS")
+@Table(name = "GRANDCHILDREN")
 @Access(AccessType.FIELD)
-public class Parent {
+public class GrandChild {
   @Id
   private Long id;
 
@@ -31,16 +27,12 @@ public class Parent {
   @Column(length = 32)
   private String name;
   
-  @OneToMany(
-      fetch = FetchType.LAZY, 
-      mappedBy = "parent", 
-      cascade = CascadeType.ALL, 
-      orphanRemoval = true)
-  private List<Child> children = new ArrayList<>();
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  private Child child;
+  
+  GrandChild() {}
 
-  Parent() {}
-
-  public Parent(Long id, String name) {
+  public GrandChild(Long id, String name) {
     this.id = id;
     this.name = name;
   }
@@ -82,18 +74,44 @@ public class Parent {
   }
 
   /**
-   * Get the children.
+   * Get the child.
    * 
-   * @return the children.
+   * @return the child
    */
-  public List<Child> getChildren() {
-    return children;
+  public Child getChild() {
+    return child;
   }
   
-  public void addChild(Child c) {
-    children.add(c);
-    c.setParentLocal(this);
+  /**
+   * Set the child and wire back this grandchild in the child.
+   * 
+   * @param c The child to set.
+   */
+  public void setChild(Child c) {
+    if (child != null) {
+      if (child.equals(c)) {
+        return;
+      } else {
+        child.getGrandChildren().remove(this);
+      }
+    }
+    
+    if (c != null) {
+      c.addGrandChild(this);
+    }
+
+    setChildLocal(c);
   }
+
+  /**
+   * Set the child without wiring.
+   * 
+   * @param c The child to set
+   */
+  void setChildLocal(Child c) {
+    this.child = c;
+  }
+
   
   @Override
   public int hashCode() {
@@ -114,7 +132,7 @@ public class Parent {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    Parent other = (Parent) obj;
+    GrandChild other = (GrandChild) obj;
     if (id == null) {
       if (other.id != null) {
         return false;

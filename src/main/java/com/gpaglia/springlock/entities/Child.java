@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -19,9 +21,9 @@ import javax.persistence.Version;
  */
 
 @Entity
-@Table(name = "PARENTS")
+@Table(name = "CHILDREN")
 @Access(AccessType.FIELD)
-public class Parent {
+public class Child {
   @Id
   private Long id;
 
@@ -31,16 +33,20 @@ public class Parent {
   @Column(length = 32)
   private String name;
   
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "PARENT_ID")
+  private Parent parent;
+  
   @OneToMany(
       fetch = FetchType.LAZY, 
-      mappedBy = "parent", 
+      mappedBy = "child", 
       cascade = CascadeType.ALL, 
       orphanRemoval = true)
-  private List<Child> children = new ArrayList<>();
+  private List<GrandChild> grandChildren = new ArrayList<>();
+  
+  Child() {}
 
-  Parent() {}
-
-  public Parent(Long id, String name) {
+  public Child(Long id, String name) {
     this.id = id;
     this.name = name;
   }
@@ -82,18 +88,59 @@ public class Parent {
   }
 
   /**
-   * Get the children.
+   * Get the parent.
    * 
-   * @return the children.
+   * @return the parent
    */
-  public List<Child> getChildren() {
-    return children;
+  public Parent getParent() {
+    return parent;
   }
   
-  public void addChild(Child c) {
-    children.add(c);
-    c.setParentLocal(this);
+  /**
+   * Set the parent and wire back this child in the parent.
+   * 
+   * @param p The parent to set.
+   */
+  public void setParent(Parent p) {
+    if (parent != null) {
+      if (parent.equals(p)) {
+        return;
+      } else {
+        parent.getChildren().remove(this);
+      }
+    }
+    
+    if (p != null) {
+      p.addChild(this);
+    }
+
+    setParentLocal(p);
   }
+
+  /**
+   * Set the parent without wiring.
+   * 
+   * @param p The parent to set
+   */
+  void setParentLocal(Parent p) {
+    this.parent = p;
+  }
+  
+  /**
+   * Get the list of grand children.
+   * 
+   * @return The grand children.
+   */
+  public List<GrandChild> getGrandChildren() {
+    return this.grandChildren;
+  }
+  
+  public void addGrandChild(GrandChild gc) {
+    grandChildren.add(gc);
+    gc.setChildLocal(this);
+    
+  }
+
   
   @Override
   public int hashCode() {
@@ -114,7 +161,7 @@ public class Parent {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    Parent other = (Parent) obj;
+    Child other = (Child) obj;
     if (id == null) {
       if (other.id != null) {
         return false;

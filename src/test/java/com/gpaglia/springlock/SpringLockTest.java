@@ -50,7 +50,7 @@ public class SpringLockTest {
     Long id = 275L;
     
     // build the entity
-    Parent p0 = new Parent(id, "Hello world.");
+    Parent p0 = new Parent(id, "Parent_Name");
 
     assertThat(p0.getVersion(), is(nullValue()));
 
@@ -107,7 +107,7 @@ public class SpringLockTest {
     Long id = 278L;
     
     // build the entity
-    Parent p0 = new Parent(id, "Hello world.");
+    Parent p0 = new Parent(id, "Parent_Name");
 
     assertThat(p0.getVersion(), is(nullValue()));
 
@@ -152,7 +152,7 @@ public class SpringLockTest {
     Long id = 279L;
     
     // build the entity
-    Parent p0 = new Parent(id, "Hello world.");
+    Parent p0 = new Parent(id, "Parent_Name");
 
     assertThat(p0.getVersion(), is(nullValue()));
 
@@ -215,7 +215,7 @@ public class SpringLockTest {
     Long id = 280L;
     
     // build the entity
-    Parent p0 = new Parent(id, "Hello world.");
+    Parent p0 = new Parent(id, "Parent_Name");
 
     assertThat(p0.getVersion(), is(nullValue()));
 
@@ -261,7 +261,7 @@ public class SpringLockTest {
     Long id = 281L;
     
     // build the entity
-    Parent p0 = new Parent(id, "Hello world.");
+    Parent p0 = new Parent(id, "Parent_Name");
 
     assertThat(p0.getVersion(), is(nullValue()));
 
